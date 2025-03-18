@@ -87,7 +87,7 @@ export function DashboardOverview() {
               {formatCurrency(metrics.todayProfit, "USDT")}
             </span>
           </div>
-          <Progress value={76} max={100} className="mt-4" />
+          {/* <Progress value={76} max={100} className="mt-4" /> */}
           <span className="mt-2 text-xs text-muted-foreground">
             76% of daily target
           </span>

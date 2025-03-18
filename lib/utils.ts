@@ -1,32 +1,46 @@
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { encrypt, decrypt } from './crypto';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { encrypt, decrypt } from "./crypto";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatNumber(number: number, options: Intl.NumberFormatOptions = {}) {
-  return new Intl.NumberFormat('en-US', options).format(number);
+export function formatNumber(
+  number: number,
+  options: Intl.NumberFormatOptions = {}
+) {
+  return new Intl.NumberFormat("en-US", options).format(number);
 }
 
-export function formatCurrency(amount: number, currency: string = 'USD') {
-  return formatNumber(amount, {
-    style: 'currency',
-    currency,
-  });
+export function formatCurrency(amount: number, currency: string = "USD") {
+  const supportedCurrencies = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD"]; // List of valid ISO currency codes
+
+  if (!supportedCurrencies.includes(currency)) {
+    return `$${formatNumber(amount, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })} ${currency}`;
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
 }
 
 export function formatPercent(number: number) {
   return formatNumber(number, {
-    style: 'percent',
+    style: "percent",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
 
 export function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function debounce<T extends (...args: any[]) => any>(
@@ -51,12 +65,12 @@ export function throttle<T extends (...args: any[]) => any>(
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean;
-  
+
   return function executedFunction(...args: Parameters<T>) {
     if (!inThrottle) {
       func(...args);
       inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
+      setTimeout(() => (inThrottle = false), limit);
     }
   };
 }
@@ -69,7 +83,7 @@ export function setSecureItem(key: string, value: any) {
 export function getSecureItem<T>(key: string): T | null {
   const encrypted = localStorage.getItem(key);
   if (!encrypted) return null;
-  
+
   try {
     const decrypted = decrypt(encrypted);
     return JSON.parse(decrypted) as T;
@@ -91,7 +105,7 @@ export function generateId() {
 }
 
 export function sanitizeInput(input: string) {
-  return input.replace(/[<>]/g, '');
+  return input.replace(/[<>]/g, "");
 }
 
 export function getErrorMessage(error: unknown) {
@@ -103,11 +117,11 @@ export function copyToClipboard(text: string) {
   return navigator.clipboard.writeText(text);
 }
 
-export const isBrowser = typeof window !== 'undefined';
+export const isBrowser = typeof window !== "undefined";
 
 export function getWindowDimensions() {
   if (!isBrowser) return { width: 0, height: 0 };
-  
+
   const { innerWidth: width, innerHeight: height } = window;
   return { width, height };
 }

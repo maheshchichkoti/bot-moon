@@ -2,7 +2,11 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   LayoutDashboard,
   History,
@@ -13,7 +17,17 @@ import {
   ChevronRight,
   AlertOctagon,
 } from "lucide-react";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface DashboardSidebarProps {
   className?: string;
@@ -41,8 +55,8 @@ export function DashboardSidebar({
   return (
     <aside
       className={cn(
-        "fixed left-0 top-16 bottom-0 z-30 w-64 border-r bg-card/50 backdrop-blur transition-all duration-300",
-        !isOpen && "w-20",
+        "fixed left-0 top-16 bottom-0 z-30 border-r bg-card/50 backdrop-blur transition-all duration-300",
+        isOpen ? "w-64" : "w-16", // ✅ Ensure proper width toggling
         className
       )}
     >
@@ -56,8 +70,8 @@ export function DashboardSidebar({
                   <Button
                     variant={activeSection === item.id ? "default" : "ghost"}
                     className={cn(
-                      "w-full justify-start",
-                      !isOpen && "justify-center"
+                      "w-full flex items-center", // ✅ Ensure consistent alignment
+                      isOpen ? "justify-start px-4" : "justify-center px-2" // ✅ Proper padding on collapse
                     )}
                     onClick={() => onSectionChange(item.id)}
                   >
@@ -93,8 +107,9 @@ export function DashboardSidebar({
               <AlertDialogHeader>
                 <AlertDialogTitle>Stop Trading Bot?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will immediately stop all trading activities. Any open positions
-                  will be closed according to your risk management settings.
+                  This will immediately stop all trading activities. Any open
+                  positions will be closed according to your risk management
+                  settings.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
