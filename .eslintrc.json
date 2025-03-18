@@ -1,10 +1,6 @@
 {
-<<<<<<< HEAD
-  "extends": "next/core-web-vitals"
-=======
   "extends": "next/core-web-vitals",
   "rules": {
     "react/no-unescaped-entities": "off" // ✅ Turns off unescaped entity rule
   }
->>>>>>> 38cbfb7 (Your commit message)
 }
