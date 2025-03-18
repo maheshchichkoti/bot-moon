@@ -1,38 +1,101 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Shield, Lock, Info, Eye, EyeOff, ArrowRight, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import {
+  Shield,
+  Lock,
+  Info,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { RegisterProgress } from "@/components/register-progress";
 import { RegisterSecurity } from "@/components/register-security";
+import { Navigation } from "@/components/navigation";
+import { Footer } from "@/components/footer";
+import { useAuth } from "@/lib/auth";
+import { routes } from "@/lib/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { setHasCompletedSetup } = useAuth();
+  const { toast } = useToast();
   const [showSecret, setShowSecret] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    apiKey: "",
+    apiSecret: "",
+    telegramId: "",
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agreed) {
+      toast({
+        title: "Agreement Required",
+        description: "Please agree to the terms before proceeding.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
-    // Handle form submission
+
+    try {
+      // Simulate API call for connecting exchange
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Set setup as completed
+      setHasCompletedSetup(true);
+      
+      toast({
+        title: "Exchange Connected",
+        description: "Your exchange has been successfully connected.",
+      });
+
+      // Redirect to dashboard
+      router.push(routes.auth.dashboard);
+    } catch (error) {
+      toast({
+        title: "Connection Failed",
+        description: "Failed to connect exchange. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <main className="min-h-screen py-16 lg:py-20">
+      <Navigation />
       <div className="container max-w-4xl">
         <RegisterProgress currentStep={2} />
-        
+
         <div className="mb-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -47,7 +110,8 @@ export default function RegisterPage() {
               <p>Your API keys are encrypted and securely stored</p>
             </div>
             <p className="text-muted-foreground">
-              We never have access to your funds. Only trading permissions are required.
+              We never have access to your funds. Only trading permissions are
+              required.
             </p>
           </motion.div>
         </div>
@@ -73,8 +137,11 @@ export default function RegisterPage() {
                 <div className="relative">
                   <Input
                     id="apiKey"
+                    name="apiKey"
                     placeholder="Enter your API key"
                     className="pr-10"
+                    value={formData.apiKey}
+                    onChange={handleInputChange}
                     required
                   />
                   <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -90,9 +157,12 @@ export default function RegisterPage() {
                 <div className="relative">
                   <Input
                     id="apiSecret"
+                    name="apiSecret"
                     type={showSecret ? "text" : "password"}
                     placeholder="Enter your API secret"
                     className="pr-10"
+                    value={formData.apiSecret}
+                    onChange={handleInputChange}
                     required
                   />
                   <button
@@ -117,11 +187,17 @@ export default function RegisterPage() {
                 <Label htmlFor="telegramId">Telegram ID</Label>
                 <Input
                   id="telegramId"
+                  name="telegramId"
                   placeholder="Enter your Telegram ID"
+                  value={formData.telegramId}
+                  onChange={handleInputChange}
                   required
                 />
                 <p className="text-sm text-muted-foreground mt-1">
-                  <Link href="/telegram-guide" className="text-primary hover:underline">
+                  <Link
+                    href="/telegram-guide"
+                    className="text-primary hover:underline"
+                  >
                     How to find your Telegram ID
                   </Link>
                 </p>
@@ -142,9 +218,9 @@ export default function RegisterPage() {
                   htmlFor="terms"
                   className="text-sm leading-relaxed cursor-pointer"
                 >
-                  I understand that this bot will trade on my behalf using my API keys.
-                  I confirm that I have set up read-only API keys with trading
-                  permissions only.
+                  I understand that this bot will trade on my behalf using my
+                  API keys. I confirm that I have set up read-only API keys with
+                  trading permissions only.
                 </Label>
               </div>
 
@@ -156,7 +232,10 @@ export default function RegisterPage() {
                 disabled={!agreed || isSubmitting}
               >
                 {isSubmitting ? (
-                  "Connecting..."
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Connecting...
+                  </>
                 ) : (
                   <>
                     Connect Exchange
@@ -167,7 +246,7 @@ export default function RegisterPage() {
 
               <div className="text-center text-sm text-muted-foreground">
                 Need help?{" "}
-                <Link href="/support" className="text-primary hover:underline">
+                <Link href={routes.public.help} className="text-primary hover:underline">
                   Contact Support
                 </Link>
               </div>
@@ -182,13 +261,14 @@ export default function RegisterPage() {
             {[
               "Bot activation within 5 minutes",
               "Access your dashboard",
-              "Receive Telegram notifications"
+              "Receive Telegram notifications",
             ].map((step, index) => (
               <div
                 key={index}
                 className={cn(
                   "flex items-center gap-2",
-                  index < 2 && "md:after:content-['→'] md:after:ml-4 after:hidden"
+                  index < 2 &&
+                    "md:after:content-['→'] md:after:ml-4 after:hidden"
                 )}
               >
                 <CheckCircle2 className="w-5 h-5 text-accent shrink-0" />
@@ -198,6 +278,7 @@ export default function RegisterPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </main>
   );
 }

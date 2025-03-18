@@ -18,6 +18,7 @@ export function NavigationGuard({ children }: { children: React.ReactNode }) {
     }
 
     // Registration flow check
+<<<<<<< HEAD
     if (pathname === routes.auth.register && !hasPurchased) {
       router.push(routes.public.invest);
       return;
@@ -25,16 +26,40 @@ export function NavigationGuard({ children }: { children: React.ReactNode }) {
 
     // Post-purchase flow
     if (hasPurchased && !hasCompletedSetup && !pathname.startsWith("/register")) {
+=======
+    // if (pathname === routes.auth.register && !hasPurchased) {
+    //   router.push(routes.public.invest);
+    //   return;
+    // }
+
+    // Post-purchase flow
+    if (
+      hasPurchased &&
+      !hasCompletedSetup &&
+      !pathname.startsWith("/register")
+    ) {
+>>>>>>> 38cbfb7 (Your commit message)
       router.push(routes.auth.register);
       return;
     }
 
     // Redirect authenticated users from public-only routes
+<<<<<<< HEAD
     if (isAuthenticated && [routes.auth.login, routes.auth.register].includes(pathname)) {
+=======
+    if (
+      isAuthenticated &&
+      [routes.auth.login, routes.auth.register].includes(pathname)
+    ) {
+>>>>>>> 38cbfb7 (Your commit message)
       router.push(routes.auth.dashboard);
       return;
     }
   }, [pathname, isAuthenticated, hasPurchased, hasCompletedSetup, router]);
 
   return children;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 38cbfb7 (Your commit message)

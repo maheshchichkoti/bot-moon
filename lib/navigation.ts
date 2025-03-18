@@ -17,9 +17,15 @@ export const routes = {
     referralStats: "/dashboard/referral",
   },
   payment: {
+<<<<<<< HEAD
     checkout: "/checkout",
     success: "/checkout/success",
     failure: "/checkout/failure",
+=======
+    checkout: "/register",
+    success: "/register/success",
+    failure: "/register/failure",
+>>>>>>> 38cbfb7 (Your commit message)
   },
 };
 
@@ -34,4 +40,15 @@ export const addReturnUrl = (path: string, returnUrl?: string) => {
   const url = new URL(path, window.location.origin);
   url.searchParams.set("returnUrl", returnUrl);
   return url.pathname + url.search;
+<<<<<<< HEAD
+=======
+};
+
+export const isProtectedRoute = (path: string) => {
+  return path.startsWith("/dashboard");
+};
+
+export const isPublicOnlyRoute = (path: string) => {
+  return [routes.auth.login, routes.auth.register].includes(path);
+>>>>>>> 38cbfb7 (Your commit message)
 };

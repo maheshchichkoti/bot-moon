@@ -4,12 +4,17 @@ import { Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+<<<<<<< HEAD
+=======
+import { routes } from "@/lib/navigation";
+>>>>>>> 38cbfb7 (Your commit message)
 
 export function Footer() {
   const pathname = usePathname();
 
   const footerLinks = {
     Product: [
+<<<<<<< HEAD
       { href: "/invest", label: "Invest" },
       { href: "/security", label: "Security" },
       { href: "/referral", label: "Referral Program" },
@@ -21,6 +26,19 @@ export function Footer() {
     ],
     Legal: [
       { href: "/legal/terms", label: "Terms of Service" },
+=======
+      { href: routes.public.home, label: "Home" },
+      { href: routes.public.invest, label: "Invest" },
+      { href: routes.auth.dashboard, label: "Dashboard" },
+    ],
+    Support: [
+      { href: routes.public.help, label: "Help & FAQ" },
+      { href: routes.public.contact, label: "Contact" },
+      { href: "/docs", label: "Documentation" },
+    ],
+    Legal: [
+      { href: "/legal", label: "Terms of Service" },
+>>>>>>> 38cbfb7 (Your commit message)
       { href: "/legal/privacy", label: "Privacy Policy" },
       { href: "/legal/cookies", label: "Cookie Policy" },
     ],
@@ -36,10 +54,18 @@ export function Footer() {
               <span className="font-bold text-lg">CryptoBot Pro</span>
             </Link>
             <p className="text-sm text-muted-foreground">
+<<<<<<< HEAD
               Professional cryptocurrency trading automation for serious investors.
             </p>
           </div>
           
+=======
+              Professional cryptocurrency trading automation for serious
+              investors.
+            </p>
+          </div>
+
+>>>>>>> 38cbfb7 (Your commit message)
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
               <h4 className="font-bold mb-4">{category}</h4>
@@ -49,8 +75,15 @@ export function Footer() {
                     <Link
                       href={link.href}
                       className={cn(
+<<<<<<< HEAD
                         "text-sm text-muted-foreground hover:text-foreground transition-colors",
                         pathname === link.href && "text-foreground"
+=======
+                        "text-sm transition-colors",
+                        pathname === link.href
+                          ? "text-foreground font-medium"
+                          : "text-muted-foreground hover:text-foreground"
+>>>>>>> 38cbfb7 (Your commit message)
                       )}
                     >
                       {link.label}
@@ -61,9 +94,17 @@ export function Footer() {
             </div>
           ))}
         </div>
+<<<<<<< HEAD
         
         <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} CryptoBot Pro. All rights reserved.</p>
+=======
+
+        <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
+          <p>
+            © {new Date().getFullYear()} CryptoBot Pro. All rights reserved.
+          </p>
+>>>>>>> 38cbfb7 (Your commit message)
         </div>
       </div>
     </footer>

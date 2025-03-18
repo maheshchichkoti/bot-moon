@@ -126,7 +126,11 @@ export default function InvestPage() {
               </div>
 
               <Button size="lg" className="w-full glow-button" asChild>
+<<<<<<< HEAD
                 <Link href="/checkout">
+=======
+                <Link href="/register">
+>>>>>>> 38cbfb7 (Your commit message)
                   Buy Now
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
@@ -304,7 +308,11 @@ export default function InvestPage() {
               Join thousands of traders who are already profiting with our bot.
             </p>
             <Button size="lg" className="glow-button" asChild>
+<<<<<<< HEAD
               <Link href="/checkout">
+=======
+              <Link href="/register">
+>>>>>>> 38cbfb7 (Your commit message)
                 Get Started Now
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>

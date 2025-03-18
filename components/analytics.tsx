@@ -4,6 +4,16 @@ import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { useEffect } from "react";
 
+<<<<<<< HEAD
+=======
+// ✅ Extend the global `window` type
+declare global {
+  interface Window {
+    gtag?: (...args: any[]) => void;
+  }
+}
+
+>>>>>>> 38cbfb7 (Your commit message)
 export function Analytics() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -38,4 +48,8 @@ export function Analytics() {
       />
     </>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 38cbfb7 (Your commit message)
