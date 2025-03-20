@@ -12,10 +12,10 @@ export function NavigationGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Protected routes check
-    if (pathname.startsWith("/dashboard") && !isAuthenticated) {
-      router.push(routes.auth.login + `?returnUrl=${pathname}`);
-      return;
-    }
+    // if (pathname.startsWith("/dashboard") && !isAuthenticated) {
+    //   router.push(routes.auth.login + `?returnUrl=${pathname}`);
+    //   return;
+    // }
 
     // Registration flow check
     // if (pathname === routes.auth.register && !hasPurchased) {

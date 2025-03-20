@@ -2,282 +2,199 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Shield,
-  Lock,
-  Info,
-  Eye,
-  EyeOff,
-  ArrowRight,
-  CheckCircle2,
-  Loader2,
-} from "lucide-react";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { RegisterProgress } from "@/components/register-progress";
-import { RegisterSecurity } from "@/components/register-security";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
-import { useAuth } from "@/lib/auth";
-import { routes } from "@/lib/navigation";
-import { useToast } from "@/hooks/use-toast";
+import { Loader2, Mail, Lock, User, Github } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { setHasCompletedSetup } = useAuth();
   const { toast } = useToast();
-  const [showSecret, setShowSecret] = useState(false);
-  const [agreed, setAgreed] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    apiKey: "",
-    apiSecret: "",
-    telegramId: "",
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!agreed) {
+    setIsLoading(true);
+
+    if (formData.password !== formData.confirmPassword) {
       toast({
-        title: "Agreement Required",
-        description: "Please agree to the terms before proceeding.",
+        title: "Error",
+        description: "Passwords do not match",
         variant: "destructive",
       });
+      setIsLoading(false);
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      // Simulate API call for connecting exchange
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Set setup as completed
-      setHasCompletedSetup(true);
-      
+      await register(formData.email, formData.password, formData.name);
       toast({
-        title: "Exchange Connected",
-        description: "Your exchange has been successfully connected.",
+        title: "Success",
+        description: "Account created successfully",
       });
-
-      // Redirect to dashboard
-      router.push(routes.auth.dashboard);
+      router.push("/dashboard");
     } catch (error) {
       toast({
-        title: "Connection Failed",
-        description: "Failed to connect exchange. Please try again.",
+        title: "Error",
+        description: "Failed to create account",
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen py-16 lg:py-20">
+    <main className="min-h-screen">
       <Navigation />
-      <div className="container max-w-4xl">
-        <RegisterProgress currentStep={2} />
 
-        <div className="mb-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-3xl md:text-4xl font-bold font-heading mb-4">
-              Connect Your Exchange Account
-            </h1>
-            <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
-              <Shield className="w-5 h-5 text-primary" />
-              <p>Your API keys are encrypted and securely stored</p>
+      <div className="container flex items-center justify-center min-h-screen py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
+        >
+          <Card className="p-6 feature-card">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold mb-2">Create Account</h1>
+              <p className="text-muted-foreground">
+                Join our community of traders
+              </p>
             </div>
-            <p className="text-muted-foreground">
-              We never have access to your funds. Only trading permissions are
-              required.
-            </p>
-          </motion.div>
-        </div>
 
-        <Card className="feature-card p-6 md:p-8">
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-6">
-              {/* API Key Field */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Label htmlFor="apiKey">API Key</Label>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Info className="w-4 h-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Find this in your exchange's API management section</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
+            <div className="space-y-4 mb-6">
+              <Button variant="outline" className="w-full" disabled={isLoading}>
+                <Mail className="mr-2 h-4 w-4" />
+                Continue with Google
+              </Button>
+              <Button variant="outline" className="w-full" disabled={isLoading}>
+                <Github className="mr-2 h-4 w-4" />
+                Continue with GitHub
+              </Button>
+            </div>
+
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <Separator />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
                 <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="apiKey"
-                    name="apiKey"
-                    placeholder="Enter your API key"
-                    className="pr-10"
-                    value={formData.apiKey}
+                    id="name"
+                    name="name"
+                    placeholder="John Doe"
+                    className="pl-10"
+                    value={formData.name}
                     onChange={handleInputChange}
                     required
                   />
-                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Your API key is encrypted using AES-256 encryption
-                </p>
               </div>
 
-              {/* API Secret Field */}
-              <div>
-                <Label htmlFor="apiSecret">API Secret</Label>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
                 <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="apiSecret"
-                    name="apiSecret"
-                    type={showSecret ? "text" : "password"}
-                    placeholder="Enter your API secret"
-                    className="pr-10"
-                    value={formData.apiSecret}
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    className="pl-10"
+                    value={formData.email}
                     onChange={handleInputChange}
                     required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowSecret(!showSecret)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showSecret ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Your API secret is encrypted and never stored in plain text
-                </p>
               </div>
 
-              {/* Telegram ID Field */}
-              <div>
-                <Label htmlFor="telegramId">Telegram ID</Label>
-                <Input
-                  id="telegramId"
-                  name="telegramId"
-                  placeholder="Enter your Telegram ID"
-                  value={formData.telegramId}
-                  onChange={handleInputChange}
-                  required
-                />
-                <p className="text-sm text-muted-foreground mt-1">
-                  <Link
-                    href="/telegram-guide"
-                    className="text-primary hover:underline"
-                  >
-                    How to find your Telegram ID
-                  </Link>
-                </p>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-10"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
               </div>
 
-              {/* Security Information */}
-              <RegisterSecurity />
-
-              {/* Terms Agreement */}
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="terms"
-                  checked={agreed}
-                  onCheckedChange={(checked) => setAgreed(checked as boolean)}
-                  className="mt-1"
-                />
-                <Label
-                  htmlFor="terms"
-                  className="text-sm leading-relaxed cursor-pointer"
-                >
-                  I understand that this bot will trade on my behalf using my
-                  API keys. I confirm that I have set up read-only API keys with
-                  trading permissions only.
-                </Label>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-10"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
               </div>
 
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full"
-                disabled={!agreed || isSubmitting}
-              >
-                {isSubmitting ? (
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Connecting...
+                    Creating Account...
                   </>
                 ) : (
-                  <>
-                    Connect Exchange
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </>
+                  "Create Account"
                 )}
               </Button>
+            </form>
 
-              <div className="text-center text-sm text-muted-foreground">
-                Need help?{" "}
-                <Link href={routes.public.help} className="text-primary hover:underline">
-                  Contact Support
-                </Link>
-              </div>
-            </div>
-          </form>
-        </Card>
-
-        {/* Next Steps Preview */}
-        <div className="mt-8 text-center text-muted-foreground">
-          <p className="mb-2">What happens next?</p>
-          <div className="flex flex-col md:flex-row gap-4 justify-center items-center md:items-start">
-            {[
-              "Bot activation within 5 minutes",
-              "Access your dashboard",
-              "Receive Telegram notifications",
-            ].map((step, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "flex items-center gap-2",
-                  index < 2 &&
-                    "md:after:content-['→'] md:after:ml-4 after:hidden"
-                )}
-              >
-                <CheckCircle2 className="w-5 h-5 text-accent shrink-0" />
-                <span>{step}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+            <p className="text-center text-sm text-muted-foreground mt-6">
+              Already have an account?{" "}
+              <Link href="/login" className="text-primary hover:underline">
+                Sign In
+              </Link>
+            </p>
+          </Card>
+        </motion.div>
       </div>
+
       <Footer />
     </main>
   );

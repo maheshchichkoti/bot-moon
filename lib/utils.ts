@@ -14,21 +14,18 @@ export function formatNumber(
 }
 
 export function formatCurrency(amount: number, currency: string = "USD") {
-  const supportedCurrencies = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD"]; // List of valid ISO currency codes
-
-  if (!supportedCurrencies.includes(currency)) {
-    return `$${formatNumber(amount, {
+  if (currency === "USDT") {
+    // Format as a number with 2 decimal places and add 'USDT' manually
+    return `${formatNumber(amount, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    })} ${currency}`;
+    })} USDT`;
   }
 
-  return new Intl.NumberFormat("en-US", {
+  return formatNumber(amount, {
     style: "currency",
-    currency: currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+    currency,
+  });
 }
 
 export function formatPercent(number: number) {
