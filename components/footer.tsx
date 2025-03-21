@@ -28,13 +28,14 @@ export function Footer() {
   };
 
   return (
-    <footer className="bg-secondary py-12 border-t">
-      <div className="container">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-secondary border-t py-12">
+      <div className="container space-y-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+          {/* Logo + Description */}
           <div>
-            <Link href="/" className="flex items-center space-x-2 mb-4">
+            <Link href="/" className="flex items-center gap-2 mb-4">
               <Zap className="w-6 h-6 text-primary" />
-              <span className="font-bold text-lg">CryptoBot Pro</span>
+              <span className="text-lg font-bold">CryptoBot Pro</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Professional cryptocurrency trading automation for serious
@@ -42,9 +43,10 @@ export function Footer() {
             </p>
           </div>
 
-          {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category}>
-              <h4 className="font-bold mb-4">{category}</h4>
+          {/* Footer Links */}
+          {Object.entries(footerLinks).map(([section, links]) => (
+            <div key={section}>
+              <h4 className="text-sm font-semibold mb-4">{section}</h4>
               <ul className="space-y-2">
                 {links.map((link) => (
                   <li key={link.href}>
@@ -66,7 +68,8 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
+        {/* Bottom Bar */}
+        <div className="border-t pt-6 text-center text-sm text-muted-foreground">
           <p>
             © {new Date().getFullYear()} CryptoBot Pro. All rights reserved.
           </p>
