@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { Navigation } from "@/components/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 import { signInWithGoogle } from "../../utils/firebase";
-import { useEffect } from "react";
+import { Separator } from "@/components/ui/separator";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +40,20 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      await signInWithGoogle();
+      router.push(from);
+    } catch (err) {
+      setError("Google Sign-In failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen">
       <Navigation />
@@ -51,6 +65,29 @@ export default function LoginPage() {
             <p className="text-muted-foreground">
               Sign in to access your trading dashboard
             </p>
+          </div>
+          {/* Google Sign-In Button */}
+          <div className="space-y-4 mb-6">
+            <Button
+              onClick={handleGoogleSignIn}
+              variant="outline"
+              className="w-full"
+              disabled={isLoading}
+            >
+              <Mail className="mr-2 h-4 w-4" />
+              Continue with Google
+            </Button>
+          </div>
+
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <Separator />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with email
+              </span>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

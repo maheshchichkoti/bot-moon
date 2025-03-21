@@ -10,6 +10,7 @@ import {
   signOut,
   User,
   getIdToken,
+  onIdTokenChanged,
 } from "firebase/auth";
 
 interface AuthState {
@@ -18,6 +19,7 @@ interface AuthState {
   token: string | null;
   hasPurchased: boolean;
   hasCompletedSetup: boolean;
+  initAuthListener: () => void;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
@@ -35,6 +37,41 @@ export const useAuth = create<AuthState>()(
       hasPurchased: false,
       hasCompletedSetup: false,
 
+      // 🔹 Initialize Auth Listener
+      initAuthListener: () => {
+        onIdTokenChanged(auth, async (user) => {
+          if (user) {
+            const token = await user.getIdToken();
+            set({ isAuthenticated: true, user, token });
+
+            // 🔁 Re-send token to backend to refresh session, if needed
+            try {
+              await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/firebase-auth`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+            } catch (err) {
+              console.warn("⚠️ Failed to sync user with backend:", err);
+            }
+          } else {
+            // User logged out or token invalidated
+            set({
+              isAuthenticated: false,
+              user: null,
+              token: null,
+              hasPurchased: false,
+              hasCompletedSetup: false,
+            });
+          }
+        });
+      },
+
       // 🔹 Email/Password Login
       login: async (email: string, password: string) => {
         try {
@@ -49,16 +86,20 @@ export const useAuth = create<AuthState>()(
           set({ isAuthenticated: true, user, token });
 
           // Send token to backend for verification
-          await fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/firebase-auth`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          try {
+            await fetch(
+              `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/firebase-auth`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+          } catch (err) {
+            console.warn("⚠️ Backend user sync failed:", err);
+          }
         } catch (error) {
           console.error("Login failed:", error);
           throw new Error("Failed to login. Please check your credentials.");
@@ -79,16 +120,20 @@ export const useAuth = create<AuthState>()(
           set({ isAuthenticated: true, user, token });
 
           // Send user info to backend
-          await fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/firebase-auth`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          try {
+            await fetch(
+              `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/firebase-auth`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+          } catch (err) {
+            console.warn("⚠️ Backend user sync failed:", err);
+          }
         } catch (error) {
           console.error("Registration failed:", error);
           throw new Error("Failed to register. Try again.");
@@ -105,16 +150,20 @@ export const useAuth = create<AuthState>()(
           set({ isAuthenticated: true, user, token });
 
           // Send token to backend for verification
-          await fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/firebase-auth`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          try {
+            await fetch(
+              `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/firebase-auth`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+          } catch (err) {
+            console.warn("⚠️ Backend user sync failed:", err);
+          }
         } catch (error) {
           console.error("Google login failed:", error);
           throw new Error("Google authentication failed.");

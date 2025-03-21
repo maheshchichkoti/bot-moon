@@ -146,10 +146,12 @@
     hsl(var(--primary) / 0.15) 0%,
     transparent 70%
   );
+  pointer-events: none;
 }
 
 .ticker-item {
   animation: ticker 20s linear infinite;
+  pointer-events: none;
 }
 
 @keyframes ticker {
@@ -201,6 +203,7 @@
     hsl(var(--warning) / 0.4) 0%,
     transparent 70%
   );
+  pointer-events: none;
 }
 
 .glow-button:hover::after {

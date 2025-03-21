@@ -12,11 +12,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
-import { Loader2, Mail, Lock, User, Github } from "lucide-react";
+import { Loader2, Mail, Lock, User } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function RegisterPage() {
-  console.log("Register page loaded");
   const router = useRouter();
   const { toast } = useToast();
   const { register, loginWithGoogle } = useAuth();
@@ -35,8 +34,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted");
-    // setIsLoading(true);
+    setIsLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
       toast({
@@ -44,27 +42,36 @@ export default function RegisterPage() {
         description: "Passwords do not match",
         variant: "destructive",
       });
-      // setIsLoading(false);
+      setIsLoading(false);
       return;
     }
 
     try {
-      console.log("Attempting to register");
       await register(formData.email, formData.password, formData.name);
       toast({
         title: "Success",
         description: "Account created successfully",
       });
       router.push("/bot/activate");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration failed", error);
-      if (error instanceof Error) {
-        alert(error.message);
-      } else {
-        alert("An unknown error occurred.");
+
+      let message = "Failed to register. Try again.";
+      if (error?.code === "auth/email-already-in-use") {
+        message = "Email is already in use. Try logging in instead.";
+      } else if (error?.code === "auth/invalid-email") {
+        message = "Invalid email format.";
+      } else if (error?.code === "auth/weak-password") {
+        message = "Password should be at least 6 characters.";
       }
+
+      toast({
+        title: "Registration Failed",
+        description: message,
+        variant: "destructive",
+      });
     } finally {
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -90,8 +97,7 @@ export default function RegisterPage() {
             <div className="space-y-4 mb-6">
               <Button
                 onClick={() => {
-                  console.log("Google login button clicked");
-                  // setIsLoading(true);
+                  setIsLoading(true);
                   loginWithGoogle()
                     .then(() => router.push("/bot/activate"))
                     .catch((err) => {
@@ -101,8 +107,8 @@ export default function RegisterPage() {
                         description: "Google login failed. Try again.",
                         variant: "destructive",
                       });
-                    });
-                  // .finally(() => setIsLoading(false));
+                    })
+                    .finally(() => setIsLoading(false)); // ✅ fixed the syntax here
                 }}
                 variant="outline"
                 className="w-full"
@@ -138,6 +144,7 @@ export default function RegisterPage() {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -156,6 +163,7 @@ export default function RegisterPage() {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -174,6 +182,7 @@ export default function RegisterPage() {
                     value={formData.password}
                     onChange={handleInputChange}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -192,6 +201,7 @@ export default function RegisterPage() {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>

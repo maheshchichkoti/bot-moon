@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { PageTransition } from "@/components/page-transition";
 import { NavigationGuard } from "@/components/navigation-guard";
 import { Analytics } from "@/components/analytics";
-import AuthListener from "@/components/AuthListener";
+import AuthListenerWrapper from "@/components/AuthListenerWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -89,10 +89,11 @@ export default function RootLayout({
           enableSystem={false}
           storageKey="cryptobot-theme"
         >
-          <AuthListener />
-          <NavigationGuard>
-            <PageTransition>{children}</PageTransition>
-          </NavigationGuard>
+          <AuthListenerWrapper>
+            <NavigationGuard>
+              <PageTransition>{children}</PageTransition>
+            </NavigationGuard>
+          </AuthListenerWrapper>
           <Toaster />
         </ThemeProvider>
         <Analytics />
