@@ -15,6 +15,7 @@ import {
 
 interface AuthState {
   isAuthenticated: boolean;
+  isAuthResolved: boolean;
   user: User | null;
   token: string | null;
   hasPurchased: boolean;
@@ -32,6 +33,7 @@ export const useAuth = create<AuthState>()(
   persist(
     (set) => ({
       isAuthenticated: false,
+      isAuthResolved: false,
       user: null,
       token: null,
       hasPurchased: false,
@@ -42,7 +44,12 @@ export const useAuth = create<AuthState>()(
         onIdTokenChanged(auth, async (user) => {
           if (user) {
             const token = await user.getIdToken();
-            set({ isAuthenticated: true, user, token });
+            set({
+              isAuthenticated: true,
+              user,
+              token,
+              isAuthResolved: true, // ✅ RESOLVED
+            });
 
             // 🔁 Re-send token to backend to refresh session, if needed
             try {
@@ -67,6 +74,7 @@ export const useAuth = create<AuthState>()(
               token: null,
               hasPurchased: false,
               hasCompletedSetup: false,
+              isAuthResolved: true,
             });
           }
         });
@@ -179,6 +187,7 @@ export const useAuth = create<AuthState>()(
           token: null,
           hasPurchased: false,
           hasCompletedSetup: false,
+          isAuthResolved: true,
         });
       },
 

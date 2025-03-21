@@ -8,20 +8,31 @@ import { routes } from "@/lib/navigation";
 export function NavigationGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, hasPurchased, hasCompletedSetup } = useAuth();
+  const {
+    isAuthenticated,
+    hasPurchased,
+    hasCompletedSetup,
+    isAuthResolved, // <-- make sure this is exposed from useAuth
+  } = useAuth();
 
   useEffect(() => {
+    if (!isAuthResolved) return;
+
     // Protected routes check
-    // if (pathname.startsWith("/dashboard") && !isAuthenticated) {
-    //   router.push(routes.auth.login + `?returnUrl=${pathname}`);
-    //   return;
-    // }
+    if (pathname.startsWith("/dashboard") && !isAuthenticated) {
+      if (pathname !== routes.auth.login) {
+        router.push(`${routes.auth.login}?returnUrl=${pathname}`);
+      }
+      return;
+    }
 
     // Registration flow check
-    // if (pathname === routes.auth.register && !hasPurchased) {
-    //   router.push(routes.public.invest);
-    //   return;
-    // }
+    if (pathname === routes.auth.register && !hasPurchased) {
+      if (pathname !== routes.public.invest) {
+        router.push(routes.public.invest);
+      }
+      return;
+    }
 
     // Post-purchase flow
     if (
@@ -29,7 +40,9 @@ export function NavigationGuard({ children }: { children: React.ReactNode }) {
       !hasCompletedSetup &&
       !pathname.startsWith("/register")
     ) {
-      router.push(routes.auth.register);
+      if (pathname !== routes.auth.register) {
+        router.push(routes.auth.register);
+      }
       return;
     }
 
@@ -38,10 +51,19 @@ export function NavigationGuard({ children }: { children: React.ReactNode }) {
       isAuthenticated &&
       [routes.auth.login, routes.auth.register].includes(pathname)
     ) {
-      router.push(routes.auth.dashboard);
+      if (pathname !== routes.auth.dashboard) {
+        router.push(routes.auth.dashboard);
+      }
       return;
     }
-  }, [pathname, isAuthenticated, hasPurchased, hasCompletedSetup, router]);
+  }, [
+    pathname,
+    isAuthenticated,
+    hasPurchased,
+    hasCompletedSetup,
+    isAuthResolved,
+    router,
+  ]);
 
   return children;
 }
