@@ -36,7 +36,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted");
-    setIsLoading(true);
+    // setIsLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
       toast({
@@ -44,7 +44,7 @@ export default function RegisterPage() {
         description: "Passwords do not match",
         variant: "destructive",
       });
-      setIsLoading(false);
+      // setIsLoading(false);
       return;
     }
 
@@ -64,7 +64,7 @@ export default function RegisterPage() {
         alert("An unknown error occurred.");
       }
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
@@ -91,7 +91,7 @@ export default function RegisterPage() {
               <Button
                 onClick={() => {
                   console.log("Google login button clicked");
-                  setIsLoading(true);
+                  // setIsLoading(true);
                   loginWithGoogle()
                     .then(() => router.push("/bot/activate"))
                     .catch((err) => {
@@ -101,8 +101,8 @@ export default function RegisterPage() {
                         description: "Google login failed. Try again.",
                         variant: "destructive",
                       });
-                    })
-                    .finally(() => setIsLoading(false));
+                    });
+                  // .finally(() => setIsLoading(false));
                 }}
                 variant="outline"
                 className="w-full"
