@@ -25,7 +25,7 @@ export function Navigation() {
 
   const handleLogout = () => {
     logout();
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   const navItems = [
@@ -38,7 +38,12 @@ export function Navigation() {
   const renderAuthButton = () => {
     if (isAuthenticated) {
       return (
-        <Button variant="ghost" onClick={handleLogout} className="gap-2">
+        <Button
+          variant="ghost"
+          onClick={handleLogout}
+          className="gap-2"
+          aria-label="Logout"
+        >
           <LogOut className="w-4 h-4" />
           Logout
         </Button>
@@ -47,7 +52,7 @@ export function Navigation() {
 
     return (
       <Button asChild>
-        <Link href="/invest">Buy Now</Link>
+        <Link href="/register">Get Started</Link>
       </Button>
     );
   };
@@ -62,6 +67,7 @@ export function Navigation() {
       )}
     >
       <div className="container flex h-16 items-center justify-between">
+        {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
           <Zap className="w-8 h-8 text-primary" />
           <span className="font-bold text-xl">CryptoBot Pro</span>
@@ -74,8 +80,9 @@ export function Navigation() {
               key={item.href}
               href={item.href}
               className={cn(
-                "text-foreground/80 hover:text-foreground transition-colors",
-                pathname === item.href && "text-foreground font-medium"
+                "relative text-foreground/80 hover:text-foreground transition-colors",
+                pathname === item.href &&
+                  "text-foreground font-semibold after:absolute after:left-0 after:bottom-[-4px] after:w-full after:h-[2px] after:bg-primary"
               )}
             >
               {item.label}
@@ -87,26 +94,29 @@ export function Navigation() {
         {/* Mobile Navigation */}
         <Sheet>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Open menu">
               <Menu className="w-5 h-5" />
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-            <nav className="flex flex-col gap-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "text-foreground/80 hover:text-foreground transition-colors",
-                    pathname === item.href && "text-foreground font-medium"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <div className="mt-4">{renderAuthButton()}</div>
-            </nav>
+            <div className="py-4">
+              <h2 className="text-lg font-semibold mb-4">Menu</h2>
+              <nav className="flex flex-col gap-4">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "text-foreground/80 hover:text-foreground transition-colors",
+                      pathname === item.href && "text-foreground font-medium"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <div className="mt-6">{renderAuthButton()}</div>
+              </nav>
+            </div>
           </SheetContent>
         </Sheet>
       </div>
