@@ -16,9 +16,10 @@ import { Loader2, Mail, Lock, User, Github } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function RegisterPage() {
+  console.log("Register page loaded");
   const router = useRouter();
   const { toast } = useToast();
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -34,6 +35,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submitted");
     setIsLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
@@ -47,18 +49,20 @@ export default function RegisterPage() {
     }
 
     try {
+      console.log("Attempting to register");
       await register(formData.email, formData.password, formData.name);
       toast({
         title: "Success",
         description: "Account created successfully",
       });
-      router.push("/dashboard");
+      router.push("/bot/activate");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create account",
-        variant: "destructive",
-      });
+      console.error("Registration failed", error);
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("An unknown error occurred.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -84,13 +88,28 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-4 mb-6">
-              <Button variant="outline" className="w-full" disabled={isLoading}>
+              <Button
+                onClick={() => {
+                  console.log("Google login button clicked");
+                  setIsLoading(true);
+                  loginWithGoogle()
+                    .then(() => router.push("/bot/activate"))
+                    .catch((err) => {
+                      console.error("Google Login Failed", err);
+                      toast({
+                        title: "Error",
+                        description: "Google login failed. Try again.",
+                        variant: "destructive",
+                      });
+                    })
+                    .finally(() => setIsLoading(false));
+                }}
+                variant="outline"
+                className="w-full"
+                disabled={isLoading}
+              >
                 <Mail className="mr-2 h-4 w-4" />
                 Continue with Google
-              </Button>
-              <Button variant="outline" className="w-full" disabled={isLoading}>
-                <Github className="mr-2 h-4 w-4" />
-                Continue with GitHub
               </Button>
             </div>
 
@@ -113,6 +132,7 @@ export default function RegisterPage() {
                   <Input
                     id="name"
                     name="name"
+                    autoComplete="name"
                     placeholder="John Doe"
                     className="pl-10"
                     value={formData.name}
@@ -130,6 +150,7 @@ export default function RegisterPage() {
                     id="email"
                     name="email"
                     type="email"
+                    autoComplete="username"
                     placeholder="you@example.com"
                     className="pl-10"
                     value={formData.email}
@@ -147,6 +168,7 @@ export default function RegisterPage() {
                     id="password"
                     name="password"
                     type="password"
+                    autoComplete="new-password"
                     placeholder="••••••••"
                     className="pl-10"
                     value={formData.password}
@@ -164,6 +186,7 @@ export default function RegisterPage() {
                     id="confirmPassword"
                     name="confirmPassword"
                     type="password"
+                    autoComplete="new-password"
                     placeholder="••••••••"
                     className="pl-10"
                     value={formData.confirmPassword}

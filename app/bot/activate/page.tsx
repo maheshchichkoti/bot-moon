@@ -285,7 +285,7 @@ export default function RegisterPage() {
           </div>
         </div>
       </main>
-      <Footer className="mt-auto" />
+      <Footer />
     </div>
   );
 }

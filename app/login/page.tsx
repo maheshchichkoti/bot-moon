@@ -10,6 +10,8 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { Navigation } from "@/components/navigation";
 import { Loader2 } from "lucide-react";
+import { signInWithGoogle } from "../../utils/firebase";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +43,7 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen">
       <Navigation />
-      
+
       <div className="container flex items-center justify-center min-h-screen py-20">
         <Card className="w-full max-w-md p-6 feature-card">
           <div className="text-center mb-8">

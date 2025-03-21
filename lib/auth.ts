@@ -2,21 +2,26 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-interface User {
-  name: string;
-  email: string;
-  avatar?: string;
-}
+import { auth, provider } from "@/utils/firebase";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  User,
+  getIdToken,
+} from "firebase/auth";
 
 interface AuthState {
   isAuthenticated: boolean;
+  user: User | null;
+  token: string | null;
   hasPurchased: boolean;
   hasCompletedSetup: boolean;
-  user: User | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
+  loginWithGoogle: () => Promise<void>;
+  logout: () => Promise<void>;
   setHasPurchased: (value: boolean) => void;
   setHasCompletedSetup: (value: boolean) => void;
 }
@@ -25,69 +30,116 @@ export const useAuth = create<AuthState>()(
   persist(
     (set) => ({
       isAuthenticated: false,
+      user: null,
+      token: null,
       hasPurchased: false,
       hasCompletedSetup: false,
-      user: null,
 
-      // Login function with error handling
+      // 🔹 Email/Password Login
       login: async (email: string, password: string) => {
         try {
-          // Simulate API call
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const userCredential = await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+          const user = userCredential.user;
+          const token = await getIdToken(user);
 
-          set({
-            isAuthenticated: true,
-            user: {
-              name: "John Doe",
-              email,
-              avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-            },
-          });
+          set({ isAuthenticated: true, user, token });
+
+          // Send token to backend for verification
+          await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/firebase-auth`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
         } catch (error) {
           console.error("Login failed:", error);
-          throw new Error("Failed to login. Please try again.");
+          throw new Error("Failed to login. Please check your credentials.");
         }
       },
 
-      // Register function with error handling
+      // 🔹 Register with Email/Password
       register: async (email: string, password: string, name: string) => {
         try {
-          // Simulate API call
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+          const user = userCredential.user;
+          const token = await getIdToken(user);
 
-          set({
-            isAuthenticated: true,
-            user: {
-              name,
-              email,
-              avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-            },
-          });
+          set({ isAuthenticated: true, user, token });
+
+          // Send user info to backend
+          await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/firebase-auth`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
         } catch (error) {
           console.error("Registration failed:", error);
-          throw new Error("Failed to register. Please try again.");
+          throw new Error("Failed to register. Try again.");
         }
       },
 
-      // Logout function
-      logout: () => {
+      // 🔹 Google Login
+      loginWithGoogle: async () => {
+        try {
+          const userCredential = await signInWithPopup(auth, provider);
+          const user = userCredential.user;
+          const token = await getIdToken(user);
+
+          set({ isAuthenticated: true, user, token });
+
+          // Send token to backend for verification
+          await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/firebase-auth`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+        } catch (error) {
+          console.error("Google login failed:", error);
+          throw new Error("Google authentication failed.");
+        }
+      },
+
+      // 🔹 Logout
+      logout: async () => {
+        await signOut(auth);
         set({
           isAuthenticated: false,
           user: null,
+          token: null,
           hasPurchased: false,
           hasCompletedSetup: false,
         });
       },
 
-      // Set hasPurchased state
+      // 🔹 Set user properties
       setHasPurchased: (value: boolean) => set({ hasPurchased: value }),
-
-      // Set hasCompletedSetup state
       setHasCompletedSetup: (value: boolean) =>
         set({ hasCompletedSetup: value }),
     }),
     {
-      name: "auth-storage", // Key for persisted state in localStorage
+      name: "auth-storage",
     }
   )
 );
