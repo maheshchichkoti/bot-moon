@@ -30,23 +30,30 @@ export function DashboardMobileNav({
   onSectionChange,
 }: DashboardMobileNavProps) {
   return (
-    <nav className={cn("py-2 px-4", className)}>
-      <div className="flex justify-between items-center">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Button
-              key={item.id}
-              variant={activeSection === item.id ? "default" : "ghost"}
-              className="flex-col gap-1 h-auto py-2"
-              onClick={() => onSectionChange(item.id)}
-            >
-              <Icon className="w-5 h-5" />
-              <span className="text-xs">{item.label}</span>
-            </Button>
-          );
-        })}
-      </div>
+    <nav
+      className={cn(
+        "w-full px-4 py-2 bg-background border-t flex justify-between items-center",
+        className
+      )}
+      role="navigation"
+      aria-label="Mobile dashboard navigation"
+    >
+      {navItems.map(({ id, label, icon: Icon }) => (
+        <Button
+          key={id}
+          variant={activeSection === id ? "default" : "ghost"}
+          className={cn(
+            "flex flex-col items-center gap-1 h-auto px-2 py-2 flex-1",
+            activeSection === id && "bg-muted"
+          )}
+          onClick={() => onSectionChange(id)}
+          aria-current={activeSection === id ? "page" : undefined}
+          aria-label={`Go to ${label}`}
+        >
+          <Icon className="w-5 h-5" />
+          <span className="text-[10px] font-medium leading-none">{label}</span>
+        </Button>
+      ))}
     </nav>
   );
 }

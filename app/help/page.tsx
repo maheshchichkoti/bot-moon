@@ -17,7 +17,7 @@ const categories = [
   "Bot Setup",
   "Trading & Performance",
   "Referral Program",
-  "Security"
+  "Security",
 ];
 
 export default function HelpPage() {
@@ -27,7 +27,7 @@ export default function HelpPage() {
   return (
     <main className="min-h-screen">
       <Navigation />
-      
+
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 hero-gradient dot-pattern" />
@@ -89,7 +89,9 @@ export default function HelpPage() {
             {["Binance", "Bybit", "KuCoin"].map((exchange) => (
               <Card key={exchange} className="feature-card">
                 <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-4">{exchange} Setup</h3>
+                  <h3 className="text-xl font-semibold mb-4">
+                    {exchange} Setup
+                  </h3>
                   <p className="text-muted-foreground mb-4">
                     Learn how to create and configure API keys for {exchange}.
                   </p>

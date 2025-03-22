@@ -55,49 +55,54 @@ export function DashboardSidebar({
   return (
     <aside
       className={cn(
-        "fixed left-0 top-16 bottom-0 z-30 border-r bg-card/50 backdrop-blur transition-all duration-300",
-        isOpen ? "w-64" : "w-16", // ✅ Ensure proper width toggling
+        "fixed top-16 bottom-0 left-0 z-40 border-r bg-card/50 backdrop-blur-lg transition-all duration-300",
+        isOpen ? "w-64" : "w-16",
         className
       )}
+      role="complementary"
+      aria-label="Dashboard sidebar"
     >
       <div className="flex h-full flex-col justify-between p-3">
-        <div className="space-y-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Tooltip key={item.id}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={activeSection === item.id ? "default" : "ghost"}
-                    className={cn(
-                      "w-full flex items-center", // ✅ Ensure consistent alignment
-                      isOpen ? "justify-start px-4" : "justify-center px-2" // ✅ Proper padding on collapse
-                    )}
-                    onClick={() => onSectionChange(item.id)}
-                  >
-                    <Icon className="w-5 h-5" />
-                    {isOpen && <span className="ml-3">{item.label}</span>}
-                  </Button>
-                </TooltipTrigger>
-                {!isOpen && (
-                  <TooltipContent side="right">
-                    <p>{item.label}</p>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            );
-          })}
-        </div>
+        {/* Navigation */}
+        <nav className="space-y-2" aria-label="Main navigation">
+          {navItems.map(({ id, label, icon: Icon }) => (
+            <Tooltip key={id}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={activeSection === id ? "default" : "ghost"}
+                  className={cn(
+                    "w-full flex items-center text-sm",
+                    isOpen ? "justify-start px-4" : "justify-center px-2"
+                  )}
+                  onClick={() => onSectionChange(id)}
+                  aria-label={`Go to ${label}`}
+                  aria-current={activeSection === id ? "page" : undefined}
+                >
+                  <Icon className="w-5 h-5" />
+                  {isOpen && <span className="ml-3">{label}</span>}
+                </Button>
+              </TooltipTrigger>
+              {!isOpen && (
+                <TooltipContent side="right">
+                  <p>{label}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          ))}
+        </nav>
 
+        {/* Footer: Danger Action + Toggle */}
         <div className="space-y-2">
+          {/* Stop Bot Button */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
                 variant="destructive"
                 className={cn(
-                  "w-full justify-start",
-                  !isOpen && "justify-center"
+                  "w-full flex items-center",
+                  isOpen ? "justify-start px-4" : "justify-center px-2"
                 )}
+                aria-label="Stop trading bot"
               >
                 <AlertOctagon className="w-5 h-5" />
                 {isOpen && <span className="ml-3">Stop Bot</span>}
@@ -107,9 +112,8 @@ export function DashboardSidebar({
               <AlertDialogHeader>
                 <AlertDialogTitle>Stop Trading Bot?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will immediately stop all trading activities. Any open
-                  positions will be closed according to your risk management
-                  settings.
+                  This will immediately stop all trading activities and close
+                  open positions based on your risk settings.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -119,11 +123,13 @@ export function DashboardSidebar({
             </AlertDialogContent>
           </AlertDialog>
 
+          {/* Toggle Collapse/Expand */}
           <Button
             variant="outline"
             size="icon"
             className="w-full"
             onClick={onToggle}
+            aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
             {isOpen ? (
               <ChevronLeft className="w-4 h-4" />

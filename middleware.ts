@@ -7,16 +7,16 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = request.cookies.has("auth-storage");
 
   // Check if trying to access protected routes while not authenticated
-  // if (isProtectedRoute(pathname) && !isAuthenticated) {
-  //   const url = new URL(routes.auth.login, request.url);
-  //   url.searchParams.set("returnUrl", pathname);
-  //   return NextResponse.redirect(url);
-  // }
+  if (isProtectedRoute(pathname) && !isAuthenticated) {
+    const url = new URL(routes.auth.login, request.url);
+    url.searchParams.set("returnUrl", pathname);
+    return NextResponse.redirect(url);
+  }
 
   // Redirect authenticated users away from public-only routes
-  // if (isPublicOnlyRoute(pathname) && isAuthenticated) {
-  //   return NextResponse.redirect(new URL(routes.auth.dashboard, request.url));
-  // }
+  if (isPublicOnlyRoute(pathname) && isAuthenticated) {
+    return NextResponse.redirect(new URL(routes.auth.dashboard, request.url));
+  }
 
   return NextResponse.next();
 }

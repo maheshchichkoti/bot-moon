@@ -1,12 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, TrendingUp, Wallet, RefreshCw } from "lucide-react";
-import { useState, useEffect } from "react";
 import { formatCurrency, formatPercent } from "@/lib/utils";
 
 export function DashboardOverview() {
@@ -23,14 +22,13 @@ export function DashboardOverview() {
 
   const handleRecharge = async () => {
     setIsLoading(true);
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsLoading(false);
   };
 
   return (
     <div className="space-y-6">
-      {/* Fee Balance Warning */}
+      {/* Low Fee Balance Alert */}
       {feeBalance < 10 && (
         <Alert
           variant="destructive"
@@ -38,17 +36,16 @@ export function DashboardOverview() {
         >
           <AlertCircle className="h-4 w-4 text-warning" />
           <AlertTitle>Low Fee Balance</AlertTitle>
-          <AlertDescription className="flex items-center justify-between">
+          <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-1">
             <span>
-              Your fee balance is running low. Recharge to ensure uninterrupted
-              trading.
+              Your fee balance is running low. Recharge to avoid interruptions.
             </span>
             <Button
               variant="outline"
               size="sm"
               onClick={handleRecharge}
               disabled={isLoading}
-              className="ml-4"
+              aria-label="Recharge fee balance"
             >
               {isLoading ? (
                 <>
@@ -63,23 +60,25 @@ export function DashboardOverview() {
         </Alert>
       )}
 
-      {/* Metrics Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-6">
-          <div className="flex flex-col space-y-2">
+      {/* Overview Metrics Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Total Profit */}
+        <Card className="p-5 space-y-3">
+          <div className="flex flex-col">
             <span className="text-sm text-muted-foreground">Total Profit</span>
             <span className="text-2xl font-bold text-accent">
               {formatCurrency(metrics.totalProfit, "USDT")}
             </span>
           </div>
-          <div className="mt-4 flex items-center text-sm text-muted-foreground">
+          <div className="flex items-center text-sm text-muted-foreground">
             <TrendingUp className="mr-1 h-4 w-4 text-accent" />
             <span>+{formatPercent(0.234)} this month</span>
           </div>
         </Card>
 
-        <Card className="p-6">
-          <div className="flex flex-col space-y-2">
+        {/* Today's Profit */}
+        <Card className="p-5 space-y-3">
+          <div className="flex flex-col">
             <span className="text-sm text-muted-foreground">
               Today's Profit
             </span>
@@ -87,37 +86,40 @@ export function DashboardOverview() {
               {formatCurrency(metrics.todayProfit, "USDT")}
             </span>
           </div>
-          {/* <Progress value={76} max={100} className="mt-4" /> */}
-          <span className="mt-2 text-xs text-muted-foreground">
+          <div className="text-xs text-muted-foreground mt-2">
             76% of daily target
-          </span>
+          </div>
         </Card>
 
-        <Card className="p-6">
-          <div className="flex flex-col space-y-2">
+        {/* Win Rate */}
+        <Card className="p-5 space-y-3">
+          <div className="flex flex-col">
             <span className="text-sm text-muted-foreground">Win Rate</span>
             <span className="text-2xl font-bold">
               {formatPercent(metrics.winRate / 100)}
             </span>
           </div>
-          <div className="mt-4 flex items-center text-sm text-muted-foreground">
-            <span>{metrics.tradesCount} total trades</span>
+          <div className="text-sm text-muted-foreground mt-2">
+            {metrics.tradesCount} total trades
           </div>
         </Card>
 
-        <Card className="p-6">
-          <div className="flex flex-col space-y-2">
+        {/* Fee Balance */}
+        <Card className="p-5 space-y-3">
+          <div className="flex flex-col">
             <span className="text-sm text-muted-foreground">Fee Balance</span>
             <span className="text-2xl font-bold">
               {formatCurrency(feeBalance, "USDT")}
             </span>
           </div>
-          <div className="mt-4 flex items-center text-sm text-muted-foreground">
+          <div className="flex items-center text-sm text-muted-foreground mt-2">
             <Wallet className="mr-1 h-4 w-4" />
-            <span>Covers ~{Math.floor(feeBalance / 0.5)} trades</span>
+            <span>~{Math.floor(feeBalance / 0.5)} trades remaining</span>
           </div>
         </Card>
       </div>
     </div>
   );
 }
+
+export default DashboardOverview;

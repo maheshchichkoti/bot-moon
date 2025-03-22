@@ -10,28 +10,34 @@ import {
 const faqs = [
   {
     question: "How secure are my API keys?",
-    answer: "Your API keys are encrypted using bank-grade encryption and are stored securely. We only require trading permissions, not withdrawal access, ensuring your funds remain safe."
+    answer:
+      "Your API keys are encrypted using bank-grade encryption and are stored securely. We only require trading permissions, not withdrawal access, ensuring your funds remain safe.",
   },
   {
     question: "What exchanges are supported?",
-    answer: "We currently support Binance, Bybit, and KuCoin. More exchanges will be added based on user demand and security verification."
+    answer:
+      "We currently support Binance, Bybit, and KuCoin. More exchanges will be added based on user demand and security verification.",
   },
   {
     question: "How do I top up my fee balance?",
-    answer: "You can top up your fee balance at any time by sending USDT to your dedicated fee wallet address. The minimum top-up amount is 10 USDT."
+    answer:
+      "You can top up your fee balance at any time by sending USDT to your dedicated fee wallet address. The minimum top-up amount is 10 USDT.",
   },
   {
     question: "What trading pairs does the bot trade?",
-    answer: "The bot primarily trades major cryptocurrency pairs like BTC/USDT, ETH/USDT, and other high-liquidity pairs. The selection is optimized based on market conditions."
+    answer:
+      "The bot primarily trades major cryptocurrency pairs like BTC/USDT, ETH/USDT, and other high-liquidity pairs. The selection is optimized based on market conditions.",
   },
   {
     question: "How does the referral program work?",
-    answer: "You earn $5 USDT for every new user who purchases lifetime access using your referral link. Earnings are credited to your fee balance automatically."
+    answer:
+      "You earn $5 USDT for every new user who purchases lifetime access using your referral link. Earnings are credited to your fee balance automatically.",
   },
   {
     question: "What if I want to stop the bot?",
-    answer: "You can pause or stop the bot at any time through your dashboard. When stopped, the bot will safely close any open positions based on your preferences."
-  }
+    answer:
+      "You can pause or stop the bot at any time through your dashboard. When stopped, the bot will safely close any open positions based on your preferences.",
+  },
 ];
 
 export function InvestFAQ() {

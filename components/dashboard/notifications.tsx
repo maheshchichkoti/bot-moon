@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 const notifications = [
   {
@@ -34,42 +35,67 @@ const notifications = [
 ];
 
 export function NotificationsPopover() {
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          aria-label="Open notifications"
+        >
           <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary animate-pulse" />
+          )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80" align="end">
+
+      <PopoverContent
+        className="w-80 p-4"
+        align="end"
+        aria-label="Notifications list"
+      >
         <div className="flex items-center justify-between mb-4">
-          <h4 className="font-semibold">Notifications</h4>
-          <Button variant="ghost" size="sm" className="text-xs">
+          <h4 className="text-sm font-semibold">Notifications</h4>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs"
+            onClick={() => {
+              // Future: add a callback for marking all as read
+            }}
+          >
             Mark all as read
           </Button>
         </div>
-        <ScrollArea className="h-[300px] pr-4">
-          <div className="space-y-4">
+
+        <ScrollArea className="h-[300px] pr-2">
+          <div className="space-y-2">
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-3 rounded-lg transition-colors ${
+                role="button"
+                tabIndex={0}
+                className={cn(
+                  "p-3 rounded-md transition-colors cursor-pointer outline-none focus-visible:ring-2 ring-primary/40",
                   notification.unread
                     ? "bg-primary/5 hover:bg-primary/10"
                     : "hover:bg-muted"
-                }`}
+                )}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
+                <div className="flex justify-between gap-4">
+                  <div className="space-y-1">
                     <p className="text-sm font-medium">{notification.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-muted-foreground">
                       {notification.description}
                     </p>
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {notification.time}
-                  </p>
+                  </span>
                 </div>
               </div>
             ))}

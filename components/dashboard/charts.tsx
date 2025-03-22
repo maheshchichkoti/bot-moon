@@ -1,8 +1,6 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Line,
   LineChart,
@@ -12,8 +10,10 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
-import { useState, useEffect, useCallback, useMemo } from "react";
 import { formatCurrency } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const timeframes = ["1H", "24H", "7D", "30D", "ALL"] as const;
 type Timeframe = (typeof timeframes)[number];
@@ -28,22 +28,11 @@ export function DashboardCharts() {
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [isZoomed, setIsZoomed] = useState(false);
 
-  const generateChartData = useCallback((timeframe: Timeframe) => {
+  const generateChartData = useCallback((tf: Timeframe): ChartData[] => {
     const now = Date.now();
-    const points =
-      timeframe === "1H"
-        ? 60
-        : timeframe === "24H"
-        ? 24
-        : timeframe === "7D"
-        ? 7
-        : 30;
+    const points = tf === "1H" ? 60 : tf === "24H" ? 24 : tf === "7D" ? 7 : 30;
     const interval =
-      timeframe === "1H"
-        ? 60 * 1000
-        : timeframe === "24H"
-        ? 3600 * 1000
-        : 24 * 3600 * 1000;
+      tf === "1H" ? 60 * 1000 : tf === "24H" ? 3600 * 1000 : 24 * 3600 * 1000;
 
     return Array.from({ length: points }, (_, i) => ({
       timestamp: now - (points - 1 - i) * interval,
@@ -55,139 +44,134 @@ export function DashboardCharts() {
     setChartData(generateChartData(timeframe));
   }, [timeframe, generateChartData]);
 
-  const formatXAxis = (timestamp: number) => {
-    const date = new Date(timestamp);
-    switch (timeframe) {
-      case "1H":
-      case "24H":
+  const formatXAxis = useCallback(
+    (timestamp: number) => {
+      const date = new Date(timestamp);
+      if (timeframe === "1H" || timeframe === "24H") {
         return date.toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         });
-      case "7D":
-      case "30D":
-        return date.toLocaleDateString([], { month: "short", day: "numeric" });
-      default:
-        return date.toLocaleDateString();
-    }
-  };
+      }
+      return date.toLocaleDateString([], {
+        month: "short",
+        day: "numeric",
+      });
+    },
+    [timeframe]
+  );
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = useCallback(({ active, payload }: any) => {
     if (!active || !payload?.length) return null;
 
+    const data = payload[0]?.payload;
+
     return (
-      <TooltipProvider>
-        <Card className="p-3 bg-background/95 backdrop-blur-sm shadow-md rounded-md">
-          <p className="text-sm font-medium">
-            {new Date(payload[0].payload.timestamp).toLocaleString()}
-          </p>
-          <p className="text-sm text-accent">
-            {formatCurrency(payload[0].value, "USDT")}
-          </p>
-        </Card>
-      </TooltipProvider>
+      <Card className="p-3 bg-background/95 backdrop-blur-sm shadow-md rounded-md">
+        <p className="text-sm font-medium">
+          {new Date(data.timestamp).toLocaleString()}
+        </p>
+        <p className="text-sm text-accent">
+          {formatCurrency(data.value, "USDT")}
+        </p>
+      </Card>
     );
-  };
+  }, []);
 
   const chartHeight = useMemo(() => (isZoomed ? 600 : 400), [isZoomed]);
 
   return (
     <TooltipProvider>
-      <Card className="p-6">
-        <div className="flex flex-col space-y-4">
-          {/* Header Section */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="text-lg font-semibold">Performance Chart</h3>
-            <div className="flex flex-wrap items-center gap-2">
-              {timeframes.map((tf) => (
-                <Button
-                  key={tf}
-                  variant={timeframe === tf ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setTimeframe(tf)}
-                  className="flex-1 sm:flex-none"
-                >
-                  {tf}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Chart Section */}
-          <div
-            className="transition-all duration-300 ease-in-out"
-            style={{ height: `${chartHeight}px` }}
-            onDoubleClick={() => setIsZoomed(!isZoomed)}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={chartData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+      <Card className="p-6 space-y-6 w-full overflow-hidden">
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h3 className="text-lg font-semibold">Performance Chart</h3>
+          <div className="flex flex-wrap gap-2">
+            {timeframes.map((tf) => (
+              <Button
+                key={tf}
+                variant={tf === timeframe ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTimeframe(tf)}
+                aria-label={`Switch to ${tf} view`}
+                className="sm:min-w-[60px]"
               >
-                {/* Gradient for the line */}
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="5%"
-                      stopColor="hsl(var(--primary))"
-                      stopOpacity={0.8}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="hsl(var(--primary))"
-                      stopOpacity={0}
-                    />
-                  </linearGradient>
-                </defs>
-
-                {/* Grid & Axes */}
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="hsl(var(--muted))"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="timestamp"
-                  tickFormatter={formatXAxis}
-                  stroke="hsl(var(--muted-foreground))"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  padding={{ left: 10, right: 10 }}
-                  minTickGap={30}
-                />
-                <YAxis
-                  tickFormatter={(value) => `$${value.toLocaleString()}`}
-                  stroke="hsl(var(--muted-foreground))"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  width={80}
-                />
-
-                {/* Tooltip (Fixed Usage) */}
-                <RechartsTooltip
-                  content={<CustomTooltip />}
-                  cursor={{ stroke: "hsl(var(--muted))" }}
-                />
-
-                {/* Line */}
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{
-                    r: 4,
-                    stroke: "hsl(var(--primary))",
-                    strokeWidth: 2,
-                  }}
-                  fill="url(#colorValue)"
-                />
-              </LineChart>
-            </ResponsiveContainer>
+                {tf}
+              </Button>
+            ))}
           </div>
+        </div>
+
+        {/* Chart */}
+        <div
+          className="transition-all duration-300 ease-in-out rounded-md"
+          style={{ height: `${chartHeight}px` }}
+          onDoubleClick={() => setIsZoomed((prev) => !prev)}
+          role="img"
+          aria-label="Trading performance line chart"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={chartData}
+              margin={{ top: 10, right: 30, left: 10, bottom: 5 }}
+            >
+              <defs>
+                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0}
+                  />
+                </linearGradient>
+              </defs>
+
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--muted))"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="timestamp"
+                tickFormatter={formatXAxis}
+                stroke="hsl(var(--muted-foreground))"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+                padding={{ left: 10, right: 10 }}
+                minTickGap={30}
+              />
+              <YAxis
+                tickFormatter={(value) => `$${value.toLocaleString()}`}
+                stroke="hsl(var(--muted-foreground))"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+                width={80}
+              />
+              <RechartsTooltip
+                content={<CustomTooltip />}
+                cursor={{ stroke: "hsl(var(--muted))" }}
+              />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="hsl(var(--primary))"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{
+                  r: 4,
+                  stroke: "hsl(var(--primary))",
+                  strokeWidth: 2,
+                }}
+                fill="url(#colorValue)"
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </Card>
     </TooltipProvider>

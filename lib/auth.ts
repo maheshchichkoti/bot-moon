@@ -41,43 +41,57 @@ export const useAuth = create<AuthState>()(
 
       // 🔹 Initialize Auth Listener
       initAuthListener: () => {
-        onIdTokenChanged(auth, async (user) => {
-          if (user) {
-            const token = await user.getIdToken();
-            set({
-              isAuthenticated: true,
-              user,
-              token,
-              isAuthResolved: true, // ✅ RESOLVED
-            });
+        const fallback = setTimeout(() => {
+          set({ isAuthResolved: true }); // Fallback in case Firebase hangs
+        }, 5000); // 5-second timeout
 
-            // 🔁 Re-send token to backend to refresh session, if needed
-            try {
-              await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/firebase-auth`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                }
-              );
-            } catch (err) {
-              console.warn("⚠️ Failed to sync user with backend:", err);
+        try {
+          const unsubscribe = onIdTokenChanged(auth, async (user) => {
+            clearTimeout(fallback); // Clear the fallback timer
+
+            if (user) {
+              const token = await user.getIdToken();
+              console.log("🔑 Firebase ID Token:", token);
+              set({
+                isAuthenticated: true,
+                user,
+                token,
+                isAuthResolved: true,
+              });
+
+              // Sync token with backend
+              try {
+                await fetch(
+                  `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/firebase-auth`,
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                  }
+                );
+              } catch (err) {
+                console.warn("⚠️ Backend sync failed:", err);
+              }
+            } else {
+              // User logged out or token invalidated
+              set({
+                isAuthenticated: false,
+                user: null,
+                token: null,
+                hasPurchased: false,
+                hasCompletedSetup: false,
+                isAuthResolved: true,
+              });
             }
-          } else {
-            // User logged out or token invalidated
-            set({
-              isAuthenticated: false,
-              user: null,
-              token: null,
-              hasPurchased: false,
-              hasCompletedSetup: false,
-              isAuthResolved: true,
-            });
-          }
-        });
+          });
+
+          return () => unsubscribe(); // Cleanup listener
+        } catch (error) {
+          console.error("Firebase auth listener error:", error);
+          set({ isAuthResolved: true }); // Ensure app loads even if Firebase fails
+        }
       },
 
       // 🔹 Email/Password Login
@@ -90,6 +104,7 @@ export const useAuth = create<AuthState>()(
           );
           const user = userCredential.user;
           const token = await getIdToken(user);
+          console.log("🔑 Firebase ID Token:", token);
 
           set({ isAuthenticated: true, user, token });
 
@@ -124,6 +139,7 @@ export const useAuth = create<AuthState>()(
           );
           const user = userCredential.user;
           const token = await getIdToken(user);
+          console.log("🔑 Firebase ID Token:", token);
 
           set({ isAuthenticated: true, user, token });
 
@@ -154,7 +170,7 @@ export const useAuth = create<AuthState>()(
           const userCredential = await signInWithPopup(auth, provider);
           const user = userCredential.user;
           const token = await getIdToken(user);
-
+          console.log("🔑 Firebase ID Token:", token);
           set({ isAuthenticated: true, user, token });
 
           // Send token to backend for verification
@@ -198,6 +214,7 @@ export const useAuth = create<AuthState>()(
     }),
     {
       name: "auth-storage",
+      skipHydration: true,
     }
   )
 );
